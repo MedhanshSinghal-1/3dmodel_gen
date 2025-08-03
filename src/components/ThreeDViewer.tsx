@@ -120,6 +120,7 @@ const ThreeDViewer = forwardRef<{ resetView: () => void; exportModel: () => void
       };
 
       const onWheel = (event: WheelEvent) => {
+        event.preventDefault(); // Prevent page scrolling
         if (!cameraRef.current) return;
         
         const scaleFactor = event.deltaY > 0 ? 1.1 : 0.9;
@@ -151,7 +152,7 @@ const ThreeDViewer = forwardRef<{ resetView: () => void; exportModel: () => void
       renderer.domElement.addEventListener('mousedown', onMouseDown);
       renderer.domElement.addEventListener('mouseup', onMouseUp);
       renderer.domElement.addEventListener('mousemove', onMouseMove);
-      renderer.domElement.addEventListener('wheel', onWheel);
+      renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
       renderer.domElement.addEventListener('click', onClick);
 
       // Animation loop

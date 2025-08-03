@@ -87,18 +87,20 @@ const FloorPlanConverter: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-purple-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
+              <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
                 <Layers3 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Floor Plan 3D Converter</h1>
-                <p className="text-sm text-slate-600">Transform 2D floor plans into interactive 3D models</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Floor Plan 3D Converter
+                </h1>
+                <p className="text-sm text-slate-600">Transform 2D floor plans into stunning interactive 3D models</p>
               </div>
             </div>
             
@@ -107,14 +109,14 @@ const FloorPlanConverter: React.FC = () => {
                 <>
                   <button
                     onClick={handleResetView}
-                    className="inline-flex items-center px-3 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-purple-200 rounded-lg text-sm font-medium text-purple-700 bg-white/80 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Reset View
                   </button>
                   <button
                     onClick={handleExportModel}
-                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Export
@@ -123,7 +125,7 @@ const FloorPlanConverter: React.FC = () => {
               )}
               <button
                 onClick={handleReset}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 New Project
@@ -134,29 +136,29 @@ const FloorPlanConverter: React.FC = () => {
       </header>
 
       {/* Progress Indicator */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white/60 backdrop-blur-sm border-b border-purple-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-center space-x-8">
             {['upload', 'process', 'view'].map((step, index) => (
               <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium shadow-lg transition-all duration-300 ${
                   currentStep === step
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white scale-110'
                     : index < ['upload', 'process', 'view'].indexOf(currentStep)
-                    ? 'bg-green-600 text-white'
-                    : 'bg-slate-200 text-slate-600'
+                    ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white'
+                    : 'bg-white text-slate-600 border-2 border-slate-200'
                 }`}>
                   {index + 1}
                 </div>
                 <span className={`ml-2 text-sm font-medium capitalize ${
-                  currentStep === step ? 'text-blue-600' : 'text-slate-600'
+                  currentStep === step ? 'text-purple-600 font-semibold' : 'text-slate-600'
                 }`}>
                   {step}
                 </span>
                 {index < 2 && (
-                  <div className={`ml-8 w-16 h-0.5 ${
+                  <div className={`ml-8 w-16 h-1 rounded-full transition-all duration-500 ${
                     index < ['upload', 'process', 'view'].indexOf(currentStep)
-                      ? 'bg-green-600'
+                      ? 'bg-gradient-to-r from-green-500 to-teal-500'
                       : 'bg-slate-200'
                   }`} />
                 )}
@@ -193,8 +195,9 @@ const FloorPlanConverter: React.FC = () => {
               <div className="text-center">
                 <button
                   onClick={handleProcessStart}
-                  className="inline-flex items-center px-6 py-3 border border-transparent rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  className="inline-flex items-center px-8 py-4 border border-transparent rounded-xl text-base font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
+                  <Layers3 className="w-5 h-5 mr-2" />
                   Process Image
                 </button>
               </div>
@@ -206,19 +209,21 @@ const FloorPlanConverter: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* 3D Viewer */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-slate-900">3D Model</h2>
+                  <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Interactive 3D Model
+                  </h2>
                   {selectedRoom && (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 bg-purple-50 px-3 py-1 rounded-full">
                       <Palette className="w-4 h-4 text-slate-600" />
-                      <span className="text-sm text-slate-600">
+                      <span className="text-sm text-purple-700 font-medium">
                         Selected: {processedData.rooms.find(r => r.id === selectedRoom)?.name}
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden">
+                <div className="aspect-video bg-gradient-to-br from-slate-100 to-purple-50 rounded-xl overflow-hidden shadow-inner border border-purple-100">
                   <ThreeDViewer
                     ref={viewerRef}
                     processedData={processedData}
@@ -232,25 +237,27 @@ const FloorPlanConverter: React.FC = () => {
             {/* Controls Panel */}
             <div className="space-y-6">
               {/* Room List */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Rooms</h3>
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                  Rooms
+                </h3>
                 <div className="space-y-2">
                   {processedData.rooms.map((room) => (
                     <button
                       key={room.id}
                       onClick={() => handleRoomSelect(room.id === selectedRoom ? null : room.id)}
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      className={`w-full text-left p-4 rounded-xl border transition-all duration-200 transform hover:scale-105 ${
                         selectedRoom === room.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 hover:bg-slate-50'
+                          ? 'border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 shadow-md'
+                          : 'border-slate-200 hover:bg-gradient-to-r hover:from-purple-25 hover:to-blue-25 hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
                         <div
-                          className="w-4 h-4 rounded border border-slate-300"
+                          className="w-5 h-5 rounded-lg border-2 border-white shadow-md"
                           style={{ backgroundColor: room.color }}
                         />
-                        <span className="font-medium text-slate-900">{room.name}</span>
+                        <span className="font-semibold text-slate-900">{room.name}</span>
                       </div>
                     </button>
                   ))}
@@ -259,8 +266,10 @@ const FloorPlanConverter: React.FC = () => {
 
               {/* Color Picker */}
               {selectedRoom && (
-                <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Room Color</h3>
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
+                  <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                    Customize Color
+                  </h3>
                   <ColorPicker
                     roomId={selectedRoom}
                     currentColor={processedData.rooms.find(r => r.id === selectedRoom)?.color || '#ffffff'}
@@ -270,16 +279,18 @@ const FloorPlanConverter: React.FC = () => {
               )}
 
               {/* Statistics */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Statistics</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                  Project Stats
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
                     <span className="text-slate-600">Rooms Detected:</span>
-                    <span className="font-medium">{processedData.rooms.length}</span>
+                    <span className="font-bold text-purple-600 text-lg">{processedData.rooms.length}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg">
                     <span className="text-slate-600">Wall Segments:</span>
-                    <span className="font-medium">{processedData.walls.length}</span>
+                    <span className="font-bold text-teal-600 text-lg">{processedData.walls.length}</span>
                   </div>
                 </div>
               </div>

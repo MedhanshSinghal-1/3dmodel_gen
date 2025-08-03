@@ -31,33 +31,33 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
     <div className="max-w-2xl mx-auto">
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 transform hover:scale-105 ${
           isDragActive
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+            ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 shadow-xl'
+            : 'border-purple-300 hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-25 hover:to-blue-25 hover:shadow-lg'
         }`}
       >
         <input {...getInputProps()} />
         <div className="space-y-4">
-          <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg">
             {isDragActive ? (
-              <Upload className="w-8 h-8 text-blue-500" />
+              <Upload className="w-10 h-10 text-purple-600 animate-bounce" />
             ) : (
-              <ImageIcon className="w-8 h-8 text-slate-500" />
+              <ImageIcon className="w-10 h-10 text-purple-500" />
             )}
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">
-              {isDragActive ? 'Drop your floor plan here' : 'Upload Floor Plan'}
+            <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              {isDragActive ? 'Drop your floor plan here!' : 'Upload Your Floor Plan'}
             </h3>
-            <p className="text-slate-600 mb-4">
-              Drag and drop your 2D floor plan image, or click to browse
+            <p className="text-slate-700 mb-4 font-medium">
+              Drag and drop your 2D floor plan image, or click to browse files
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-600">
               Supports PNG, JPG, JPEG files up to 10MB
             </p>
           </div>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+          <button className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
             <Upload className="w-4 h-4 mr-2" />
             Choose File
           </button>
@@ -66,15 +66,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
       
       {/* Example images */}
       <div className="mt-8 text-center">
-        <h4 className="text-sm font-medium text-slate-900 mb-4">Example Floor Plans</h4>
+        <h4 className="text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+          Example Floor Plans
+        </h4>
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square bg-slate-200 rounded-lg flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-slate-400" />
+            <div key={i} className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105">
+              <ImageIcon className="w-8 h-8 text-purple-400" />
             </div>
           ))}
         </div>
-        <p className="text-xs text-slate-500 mt-2">
+        <p className="text-sm text-slate-600 mt-3 font-medium">
           Click on any example to use it as a demo
         </p>
       </div>

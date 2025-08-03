@@ -43,33 +43,33 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ roomId, currentColor, onColor
       {/* Current Color Display */}
       <div className="flex items-center space-x-3">
         <div
-          className="w-12 h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
+          className="w-14 h-14 rounded-xl border-3 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-all duration-200"
           style={{ backgroundColor: currentColor }}
           onClick={() => setShowPalette(!showPalette)}
         />
         <div>
-          <p className="text-sm font-medium text-slate-900">Current Color</p>
-          <p className="text-xs text-slate-500">{currentColor}</p>
+          <p className="text-sm font-semibold text-slate-900">Current Color</p>
+          <p className="text-xs text-purple-600 font-mono bg-purple-50 px-2 py-1 rounded">{currentColor}</p>
         </div>
       </div>
 
       {/* Custom Color Input */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          Custom Color
+          🎨 Custom Color
         </label>
         <div className="flex items-center space-x-2">
           <input
             type="color"
             value={currentColor}
             onChange={handleCustomColorChange}
-            className="w-10 h-10 border border-slate-300 rounded cursor-pointer"
+            className="w-12 h-12 border-2 border-purple-200 rounded-lg cursor-pointer shadow-md hover:shadow-lg transition-all duration-200"
           />
           <input
             type="text"
             value={currentColor}
             onChange={(e) => onColorChange(roomId, e.target.value)}
-            className="flex-1 px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 px-4 py-2 border border-purple-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/80 backdrop-blur-sm shadow-sm"
             placeholder="#ffffff"
           />
         </div>
@@ -79,11 +79,11 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ roomId, currentColor, onColor
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="block text-sm font-medium text-slate-700">
-            Preset Colors
+            🌈 Preset Colors
           </label>
           <button
             onClick={() => setShowPalette(!showPalette)}
-            className="text-xs text-blue-600 hover:text-blue-700 flex items-center"
+            className="text-xs text-purple-600 hover:text-purple-700 flex items-center font-medium bg-purple-50 px-2 py-1 rounded-full hover:bg-purple-100 transition-all duration-200"
           >
             <Palette className="w-3 h-3 mr-1" />
             {showPalette ? 'Hide' : 'Show'} Palette
@@ -91,13 +91,13 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ roomId, currentColor, onColor
         </div>
         
         {showPalette && (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-3 p-3 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl">
             {presetColors.map((color) => (
               <button
                 key={color}
                 onClick={() => handleColorSelect(color)}
-                className={`w-10 h-10 rounded-lg border-2 hover:scale-105 transition-transform ${
-                  currentColor === color ? 'border-blue-500' : 'border-slate-300'
+                className={`w-12 h-12 rounded-xl border-3 hover:scale-110 transition-all duration-200 shadow-md hover:shadow-lg ${
+                  currentColor === color ? 'border-purple-500 ring-2 ring-purple-200' : 'border-white'
                 }`}
                 style={{ backgroundColor: color }}
                 title={color}
@@ -111,18 +111,18 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ roomId, currentColor, onColor
       <div className="flex space-x-2">
         <button
           onClick={() => handleColorSelect('#ffffff')}
-          className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+          className="flex-1 px-4 py-2 text-xs border border-purple-200 rounded-lg hover:bg-purple-50 transition-all duration-200 font-medium bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md"
         >
-          Reset to White
+          🔄 Reset
         </button>
         <button
           onClick={() => {
             const randomColor = presetColors[Math.floor(Math.random() * presetColors.length)];
             handleColorSelect(randomColor);
           }}
-          className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+          className="flex-1 px-4 py-2 text-xs border border-purple-200 rounded-lg hover:bg-purple-50 transition-all duration-200 font-medium bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md"
         >
-          Random Color
+          🎲 Random
         </button>
       </div>
     </div>
