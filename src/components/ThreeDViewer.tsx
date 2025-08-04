@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
+import ModelExporter from '../utils/modelExporter';
 
 interface Room {
   id: string;
@@ -41,9 +42,26 @@ const ThreeDViewer = forwardRef<{ resetView: () => void; exportModel: () => void
         }
       },
       exportModel: () => {
-        console.log('Exporting 3D model...');
-        // In a real implementation, this would export the 3D model
-        alert('Export functionality would be implemented here');
+        // Show export options
+        const format = prompt(
+          'Choose export format:\n1. OBJ (Wavefront)\n2. STL (Stereolithography)\n3. GLTF (GL Transmission Format)\n\nEnter 1, 2, or 3:'
+        );
+        
+        switch (format) {
+          case '1':
+            ModelExporter.exportModel(processedData, 'obj');
+            break;
+          case '2':
+            ModelExporter.exportModel(processedData, 'stl');
+            break;
+          case '3':
+            ModelExporter.exportModel(processedData, 'gltf');
+            break;
+          default:
+            if (format) {
+              alert('Invalid format selected. Please choose 1, 2, or 3.');
+            }
+        }
       }
     }));
 
