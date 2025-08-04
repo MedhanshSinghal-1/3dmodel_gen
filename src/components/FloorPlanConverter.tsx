@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Download, RotateCcw, Palette, Layers3, Undo, Redo, Ruler, Settings } from 'lucide-react';
+import { Upload, Download, RotateCcw, Palette, Layers3, Undo, Redo, Ruler } from 'lucide-react';
 import ImageUploader from './ImageUploader';
 import ImageProcessor from './ImageProcessor';
 import ThreeDViewer from './ThreeDViewer';
@@ -29,7 +29,16 @@ const FloorPlanConverter: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<'upload' | 'process' | 'view'>('upload');
   const [showMeasurements, setShowMeasurements] = useState(false);
   const [measurementUnit, setMeasurementUnit] = useState<'ft' | 'm'>('ft');
-  const [roomStatistics, setRoomStatistics] = useState<any[]>([]);
+  const [roomStatistics, setRoomStatistics] = useState<Array<{
+    id: string;
+    name: string;
+    color: string;
+    measurements?: {
+      area: number;
+      formattedArea: string;
+      formattedDimensions: string;
+    };
+  }>>([]);
   
   const processorRef = useRef<{ processImage: () => void }>(null);
   const viewerRef = useRef<{ resetView: () => void, exportModel: () => void }>(null);
