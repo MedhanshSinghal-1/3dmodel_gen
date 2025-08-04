@@ -587,7 +587,7 @@ export class FloorPlanAnalyzer {
       }
 
       // Limit image size to prevent excessive processing
-      const maxDimension = 800;
+      const maxDimension = 600; // Reduced for better performance
       if (this.width > maxDimension || this.height > maxDimension) {
         const scale = maxDimension / Math.max(this.width, this.height);
         const newWidth = Math.floor(this.width * scale);
@@ -613,31 +613,39 @@ export class FloorPlanAnalyzer {
       
       // Step 1: Preprocessing
       onProgress?.('Preprocessing image...', 10);
-      const blurred = this.gaussianBlur(data, this.width, this.height, 2);
+      const blurred = this.gaussianBlur(data, this.width, this.height, 3);
       const grayscale = this.toGrayscale(blurred);
 
+      // Step 2: Adaptive thresholding to better separate walls from text
+      onProgress?.('Applying adaptive threshold...', 20);
+      const thresholded = this.adaptiveThreshold(grayscale, this.width, this.height);
+
+      // Step 3: Remove small components (likely text)
+      onProgress?.('Removing text artifacts...', 30);
+      const cleaned = this.removeSmallComponents(thresholded, this.width, this.height, 500);
+
       // Step 2: Edge detection
-      onProgress?.('Detecting edges...', 30);
-      const edges = this.sobelEdgeDetection(grayscale, this.width, this.height);
+      onProgress?.('Detecting structural edges...', 40);
+      const edges = this.sobelEdgeDetection(cleaned, this.width, this.height);
       
       // Step 3: Morphological operations
-      onProgress?.('Cleaning up detected features...', 50);
-      const cleaned = this.morphologicalClose(edges, this.width, this.height, 3);
+      onProgress?.('Enhancing wall structures...', 50);
+      const morphed = this.morphologicalClose(edges, this.width, this.height, 5);
 
       // Step 4: Contour detection
-      onProgress?.('Finding contours...', 70);
-      const contours = this.findContours(cleaned, this.width, this.height);
+      onProgress?.('Finding structural contours...', 60);
+      const contours = this.findContours(morphed, this.width, this.height, 150); // Higher threshold
       
       // Step 5: Wall detection
-      onProgress?.('Detecting walls...', 80);
+      onProgress?.('Detecting walls...', 70);
       const walls = this.detectWalls(contours);
       
       // Step 6: Room detection
-      onProgress?.('Identifying rooms...', 90);
-      const rooms = this.detectRooms(grayscale, this.width, this.height);
+      onProgress?.('Identifying rooms...', 80);
+      const rooms = this.detectRooms(cleaned, this.width, this.height);
 
       // Step 7: Final processing
-      onProgress?.('Finalizing results...', 100);
+      onProgress?.('Finalizing results...', 90);
 
       // Convert walls to the format expected by the 3D viewer
       const wallSegments = walls.map(wall => [
@@ -646,7 +654,9 @@ export class FloorPlanAnalyzer {
       ] as Array<[number, number]>);
 
       // Update processed image display
-      this.ctx.putImageData(new ImageData(cleaned, this.width, this.height), 0, 0);
+      this.ctx.putImageData(new ImageData(morphed, this.width, this.height), 0, 0);
+
+      onProgress?.('Complete!', 100);
 
       return {
         rooms: rooms.length > 0 ? rooms : this.generateFallbackRooms(),
