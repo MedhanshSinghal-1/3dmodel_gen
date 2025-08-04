@@ -581,56 +581,91 @@ export class FloorPlanAnalyzer {
    * Main processing function that coordinates all CV operations
    */
   async processFloorPlan(imageUrl: string, onProgress?: (step: string, progress: number) => void): Promise<ProcessingResult> {
-    if (!this.imageData) {
-      await this.loadImage(imageUrl);
+    try {
+      if (!this.imageData) {
+        await this.loadImage(imageUrl);
+      }
+
+      // Limit image size to prevent excessive processing
+      const maxDimension = 800;
+      if (this.width > maxDimension || this.height > maxDimension) {
+        const scale = maxDimension / Math.max(this.width, this.height);
+        const newWidth = Math.floor(this.width * scale);
+        const newHeight = Math.floor(this.height * scale);
+        
+        // Resize the image
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d')!;
+        tempCanvas.width = newWidth;
+        tempCanvas.height = newHeight;
+        
+        tempCtx.drawImage(this.canvas, 0, 0, newWidth, newHeight);
+        
+        this.canvas.width = newWidth;
+        this.canvas.height = newHeight;
+        this.width = newWidth;
+        this.height = newHeight;
+        this.ctx.drawImage(tempCanvas, 0, 0);
+        this.imageData = this.ctx.getImageData(0, 0, this.width, this.height);
+      }
+
+      const data = new Uint8ClampedArray(this.imageData!.data);
+      
+      // Step 1: Preprocessing
+      onProgress?.('Preprocessing image...', 10);
+      const blurred = this.gaussianBlur(data, this.width, this.height, 2);
+      const grayscale = this.toGrayscale(blurred);
+
+      // Step 2: Edge detection
+      onProgress?.('Detecting edges...', 30);
+      const edges = this.sobelEdgeDetection(grayscale, this.width, this.height);
+      
+      // Step 3: Morphological operations
+      onProgress?.('Cleaning up detected features...', 50);
+      const cleaned = this.morphologicalClose(edges, this.width, this.height, 3);
+
+      // Step 4: Contour detection
+      onProgress?.('Finding contours...', 70);
+      const contours = this.findContours(cleaned, this.width, this.height);
+      
+      // Step 5: Wall detection
+      onProgress?.('Detecting walls...', 80);
+      const walls = this.detectWalls(contours);
+      
+      // Step 6: Room detection
+      onProgress?.('Identifying rooms...', 90);
+      const rooms = this.detectRooms(grayscale, this.width, this.height);
+
+      // Step 7: Final processing
+      onProgress?.('Finalizing results...', 100);
+
+      // Convert walls to the format expected by the 3D viewer
+      const wallSegments = walls.map(wall => [
+        [(wall.start.x - this.width / 2) * 0.5, (wall.start.y - this.height / 2) * 0.5],
+        [(wall.end.x - this.width / 2) * 0.5, (wall.end.y - this.height / 2) * 0.5]
+      ] as Array<[number, number]>);
+
+      // Update processed image display
+      this.ctx.putImageData(new ImageData(cleaned, this.width, this.height), 0, 0);
+
+      return {
+        rooms: rooms.length > 0 ? rooms : this.generateFallbackRooms(),
+        walls: wallSegments.length > 0 ? wallSegments : this.generateFallbackWalls(),
+        doors: [], // TODO: Implement door detection
+        windows: [], // TODO: Implement window detection
+        confidence: this.calculateConfidence(rooms, walls)
+      };
+    } catch (error) {
+      console.error('Computer vision processing error:', error);
+      // Return fallback data on any error
+      return {
+        rooms: this.generateFallbackRooms(),
+        walls: this.generateFallbackWalls(),
+        doors: [],
+        windows: [],
+        confidence: 0.3
+      };
     }
-
-    const data = new Uint8ClampedArray(this.imageData!.data);
-    
-    // Step 1: Preprocessing
-    onProgress?.('Preprocessing image...', 10);
-    const blurred = this.gaussianBlur(data, this.width, this.height, 2);
-    const grayscale = this.toGrayscale(blurred);
-
-    // Step 2: Edge detection
-    onProgress?.('Detecting edges...', 30);
-    const edges = this.sobelEdgeDetection(grayscale, this.width, this.height);
-    
-    // Step 3: Morphological operations
-    onProgress?.('Cleaning up detected features...', 50);
-    const cleaned = this.morphologicalClose(edges, this.width, this.height, 3);
-
-    // Step 4: Contour detection
-    onProgress?.('Finding contours...', 70);
-    const contours = this.findContours(cleaned, this.width, this.height);
-    
-    // Step 5: Wall detection
-    onProgress?.('Detecting walls...', 80);
-    const walls = this.detectWalls(contours);
-    
-    // Step 6: Room detection
-    onProgress?.('Identifying rooms...', 90);
-    const rooms = this.detectRooms(grayscale, this.width, this.height);
-
-    // Step 7: Final processing
-    onProgress?.('Finalizing results...', 100);
-
-    // Convert walls to the format expected by the 3D viewer
-    const wallSegments = walls.map(wall => [
-      [(wall.start.x - this.width / 2) * 0.5, (wall.start.y - this.height / 2) * 0.5],
-      [(wall.end.x - this.width / 2) * 0.5, (wall.end.y - this.height / 2) * 0.5]
-    ] as Array<[number, number]>);
-
-    // Update processed image display
-    this.ctx.putImageData(new ImageData(cleaned, this.width, this.height), 0, 0);
-
-    return {
-      rooms: rooms.length > 0 ? rooms : this.generateFallbackRooms(),
-      walls: wallSegments.length > 0 ? wallSegments : this.generateFallbackWalls(),
-      doors: [], // TODO: Implement door detection
-      windows: [], // TODO: Implement window detection
-      confidence: this.calculateConfidence(rooms, walls)
-    };
   }
 
   /**
