@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Download, RotateCcw, Palette, Layers3 } from 'lucide-react';
+import { Upload, Download, RotateCcw, Palette, Layers3, Undo, Redo, Ruler, Settings } from 'lucide-react';
 import ImageUploader from './ImageUploader';
 import ImageProcessor from './ImageProcessor';
 import ThreeDViewer from './ThreeDViewer';
 import ColorPicker from './ColorPicker';
+import { PerformanceManager, UndoRedoManager, MeasurementTools } from '../utils/performanceUtils';
 
 interface Room {
   id: string;
@@ -26,6 +27,9 @@ const FloorPlanConverter: React.FC = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<'upload' | 'process' | 'view'>('upload');
+  const [showMeasurements, setShowMeasurements] = useState(false);
+  const [measurementUnit, setMeasurementUnit] = useState<'ft' | 'm'>('ft');
+  const [roomStatistics, setRoomStatistics] = useState<any[]>([]);
   
   const processorRef = useRef<{ processImage: () => void }>(null);
   const viewerRef = useRef<{ resetView: () => void, exportModel: () => void }>(null);
@@ -38,20 +42,48 @@ const FloorPlanConverter: React.FC = () => {
   }, []);
 
   const handleProcessComplete = useCallback((data: ProcessedData) => {
+    // Save state for undo/redo
+    if (processedData) {
+      UndoRedoManager.saveState(processedData.rooms, processedData.walls);
+    }
+
+    // Cache the result for performance
+    if (uploadedImage) {
+      PerformanceManager.cacheResult(uploadedImage, data);
+    }
+
+    // Calculate room statistics with measurements
+    const scale = MeasurementTools.detectScale(data.rooms);
+    const statistics = MeasurementTools.getRoomStatistics(data.rooms, scale, measurementUnit);
+    setRoomStatistics(statistics);
+
     setProcessedData(data);
     setCurrentStep('view');
     setIsProcessing(false);
-  }, []);
+  }, [uploadedImage, processedData, measurementUnit]);
 
   const handleProcessStart = useCallback(() => {
+    // Check cache first for performance
+    if (uploadedImage) {
+      const cachedResult = PerformanceManager.getCachedResult(uploadedImage);
+      if (cachedResult) {
+        console.log('Using cached result for faster processing');
+        handleProcessComplete(cachedResult);
+        return;
+      }
+    }
+
     setIsProcessing(true);
     if (processorRef.current) {
       processorRef.current.processImage();
     }
-  }, []);
+  }, [uploadedImage, handleProcessComplete]);
 
   const handleRoomColorChange = useCallback((roomId: string, color: string) => {
     if (!processedData) return;
+    
+    // Save state for undo/redo
+    UndoRedoManager.saveState(processedData.rooms, processedData.walls);
     
     const updatedData = {
       ...processedData,
@@ -66,13 +98,42 @@ const FloorPlanConverter: React.FC = () => {
     setSelectedRoom(roomId);
   }, []);
 
-  const handleReset = useCallback(() => {
-    setUploadedImage(null);
-    setProcessedData(null);
-    setSelectedRoom(null);
-    setCurrentStep('upload');
-    setIsProcessing(false);
-  }, []);
+  const handleUndo = useCallback(() => {
+    const previousState = UndoRedoManager.undo();
+    if (previousState && processedData) {
+      const updatedData = {
+        ...processedData,
+        rooms: previousState.rooms,
+        walls: previousState.walls
+      };
+      setProcessedData(updatedData);
+    }
+  }, [processedData]);
+
+  const handleRedo = useCallback(() => {
+    const nextState = UndoRedoManager.redo();
+    if (nextState && processedData) {
+      const updatedData = {
+        ...processedData,
+        rooms: nextState.rooms,
+        walls: nextState.walls
+      };
+      setProcessedData(updatedData);
+    }
+  }, [processedData]);
+
+  const handleToggleMeasurements = useCallback(() => {
+    setShowMeasurements(!showMeasurements);
+  }, [showMeasurements]);
+
+  const handleUnitChange = useCallback((unit: 'ft' | 'm') => {
+    setMeasurementUnit(unit);
+    if (processedData) {
+      const scale = MeasurementTools.detectScale(processedData.rooms);
+      const statistics = MeasurementTools.getRoomStatistics(processedData.rooms, scale, unit);
+      setRoomStatistics(statistics);
+    }
+  }, [processedData]);
 
   const handleResetView = useCallback(() => {
     if (viewerRef.current) {
@@ -84,6 +145,18 @@ const FloorPlanConverter: React.FC = () => {
     if (viewerRef.current) {
       viewerRef.current.exportModel();
     }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    UndoRedoManager.clearHistory();
+    PerformanceManager.clearCache();
+    setUploadedImage(null);
+    setProcessedData(null);
+    setSelectedRoom(null);
+    setCurrentStep('upload');
+    setIsProcessing(false);
+    setShowMeasurements(false);
+    setRoomStatistics([]);
   }, []);
 
   return (
@@ -107,6 +180,39 @@ const FloorPlanConverter: React.FC = () => {
             <div className="flex items-center space-x-2">
               {currentStep === 'view' && (
                 <>
+                  <button
+                    onClick={handleUndo}
+                    disabled={!UndoRedoManager.canUndo()}
+                    className={`inline-flex items-center px-3 py-2 border border-purple-200 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                      UndoRedoManager.canUndo() 
+                        ? 'text-purple-700 bg-white/80 hover:bg-purple-50' 
+                        : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                    }`}
+                  >
+                    <Undo className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleRedo}
+                    disabled={!UndoRedoManager.canRedo()}
+                    className={`inline-flex items-center px-3 py-2 border border-purple-200 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                      UndoRedoManager.canRedo() 
+                        ? 'text-purple-700 bg-white/80 hover:bg-purple-50' 
+                        : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                    }`}
+                  >
+                    <Redo className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleToggleMeasurements}
+                    className={`inline-flex items-center px-4 py-2 border border-purple-200 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                      showMeasurements 
+                        ? 'text-white bg-purple-600 hover:bg-purple-700' 
+                        : 'text-purple-700 bg-white/80 hover:bg-purple-50'
+                    }`}
+                  >
+                    <Ruler className="w-4 h-4 mr-2" />
+                    Measurements
+                  </button>
                   <button
                     onClick={handleResetView}
                     className="inline-flex items-center px-4 py-2 border border-purple-200 rounded-lg text-sm font-medium text-purple-700 bg-white/80 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
@@ -278,6 +384,75 @@ const FloorPlanConverter: React.FC = () => {
                 </div>
               )}
 
+              {/* Measurements Panel */}
+              {showMeasurements && (
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      Room Measurements
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleUnitChange('ft')}
+                        className={`px-3 py-1 text-xs rounded-full transition-all duration-200 ${
+                          measurementUnit === 'ft' 
+                            ? 'bg-purple-600 text-white' 
+                            : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                        }`}
+                      >
+                        ft
+                      </button>
+                      <button
+                        onClick={() => handleUnitChange('m')}
+                        className={`px-3 py-1 text-xs rounded-full transition-all duration-200 ${
+                          measurementUnit === 'm' 
+                            ? 'bg-purple-600 text-white' 
+                            : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                        }`}
+                      >
+                        m
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {roomStatistics.map((room) => (
+                      <div 
+                        key={room.id} 
+                        className={`p-3 rounded-lg border transition-all duration-200 ${
+                          selectedRoom === room.id
+                            ? 'border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <div
+                              className="w-3 h-3 rounded-full border border-white shadow-sm"
+                              style={{ backgroundColor: room.color }}
+                            />
+                            <span className="font-semibold text-sm">{room.name}</span>
+                          </div>
+                        </div>
+                        {room.measurements && (
+                          <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+                            <div>
+                              <span className="font-medium">Area:</span>
+                              <br />
+                              <span className="text-purple-600 font-bold">{room.measurements.formattedArea}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">Dimensions:</span>
+                              <br />
+                              <span className="text-purple-600 font-bold">{room.measurements.formattedDimensions}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Statistics */}
               <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
                 <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
@@ -292,6 +467,17 @@ const FloorPlanConverter: React.FC = () => {
                     <span className="text-slate-600">Wall Segments:</span>
                     <span className="font-bold text-teal-600 text-lg">{processedData.walls.length}</span>
                   </div>
+                  {roomStatistics.length > 0 && (
+                    <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                      <span className="text-slate-600">Total Area:</span>
+                      <span className="font-bold text-green-600 text-lg">
+                        {MeasurementTools.formatMeasurement(
+                          roomStatistics.reduce((sum, room) => sum + (room.measurements?.area || 0), 0),
+                          measurementUnit
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
