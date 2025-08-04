@@ -262,13 +262,14 @@ export class FloorPlanAnalyzer {
   private findContours(data: Uint8ClampedArray, width: number, height: number, threshold: number = 128): Point[][] {
     const visited = new Array(height).fill(null).map(() => new Array(width).fill(false));
     const contours: Point[][] = [];
+    const maxContours = 100; // Limit number of contours to process
 
-    for (let y = 0; y < height; y += 5) { // Sample every 5 pixels for efficiency
-      for (let x = 0; x < width; x += 5) {
+    for (let y = 0; y < height && contours.length < maxContours; y += 8) { // Increased sampling for efficiency
+      for (let x = 0; x < width && contours.length < maxContours; x += 8) {
         const idx = (y * width + x) * 4;
         if (data[idx] > threshold && !visited[y][x]) {
           const contour = this.traceContour(data, width, height, x, y, threshold, visited);
-          if (contour.length > 10) { // Filter out small contours
+          if (contour.length > 20 && contour.length < 3000) { // Filter out very small and very large contours
             contours.push(contour);
           }
         }
@@ -300,8 +301,15 @@ export class FloorPlanAnalyzer {
     let x = startX;
     let y = startY;
     const stack = [{x, y}];
+    const maxStackSize = 10000; // Prevent stack overflow
+    const maxContourSize = 5000; // Limit contour size
 
     while (stack.length > 0) {
+      // Prevent stack from growing too large
+      if (stack.length > maxStackSize || contour.length > maxContourSize) {
+        break;
+      }
+
       const current = stack.pop()!;
       x = current.x;
       y = current.y;
@@ -438,16 +446,17 @@ export class FloorPlanAnalyzer {
     const visited = new Array(height).fill(null).map(() => new Array(width).fill(false));
     const rooms: Room[] = [];
     let roomCounter = 1;
+    const maxRooms = 20; // Limit number of rooms to detect
 
-    for (let y = 0; y < height; y += 10) { // Sample every 10 pixels for efficiency
-      for (let x = 0; x < width; x += 10) {
+    for (let y = 0; y < height && rooms.length < maxRooms; y += 15) { // Increased sampling for efficiency
+      for (let x = 0; x < width && rooms.length < maxRooms; x += 15) {
         const idx = (y * width + x) * 4;
         
         // Look for white/light areas (rooms) that haven't been visited
         if (data[idx] > 200 && !visited[y][x]) {
           const roomPixels = this.floodFill(data, width, height, x, y, 200, visited);
           
-          if (roomPixels.length > 1000) { // Minimum room size
+          if (roomPixels.length > 1000 && roomPixels.length < 30000) { // Minimum and maximum room size
             const room = this.createRoomFromPixels(roomPixels, roomCounter++);
             rooms.push(room);
           }
@@ -472,8 +481,15 @@ export class FloorPlanAnalyzer {
   ): Point[] {
     const pixels: Point[] = [];
     const stack = [{x: startX, y: startY}];
+    const maxStackSize = 15000; // Prevent stack overflow
+    const maxPixelCount = 50000; // Limit region size
 
     while (stack.length > 0) {
+      // Prevent stack from growing too large
+      if (stack.length > maxStackSize || pixels.length > maxPixelCount) {
+        break;
+      }
+
       const {x, y} = stack.pop()!;
 
       if (x < 0 || x >= width || y < 0 || y >= height || visited[y][x]) {
