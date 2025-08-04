@@ -19,6 +19,80 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
     }
   }, [onImageUpload]);
 
+  const handleExampleClick = useCallback((exampleId: number) => {
+    // Create a simple floor plan as SVG and convert to data URL
+    const svg = generateExampleFloorPlan(exampleId);
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    onImageUpload(dataUrl);
+  }, [onImageUpload]);
+
+  const generateExampleFloorPlan = (id: number): string => {
+    const width = 400;
+    const height = 300;
+    
+    const plans = {
+      1: {
+        // Simple layout - living room and bedroom
+        walls: [
+          'M50,50 L350,50 L350,250 L50,250 Z',
+          'M200,50 L200,150',
+          'M50,150 L200,150'
+        ],
+        rooms: [
+          { x: 125, y: 100, text: 'Living Room' },
+          { x: 275, y: 150, text: 'Bedroom' },
+          { x: 125, y: 200, text: 'Kitchen' }
+        ]
+      },
+      2: {
+        // Open floor plan
+        walls: [
+          'M50,50 L350,50 L350,250 L50,250 Z',
+          'M300,50 L300,120',
+          'M200,180 L350,180'
+        ],
+        rooms: [
+          { x: 150, y: 120, text: 'Open Living Area' },
+          { x: 325, y: 85, text: 'Kitchen' },
+          { x: 275, y: 215, text: 'Bedroom' }
+        ]
+      },
+      3: {
+        // Multi-room layout
+        walls: [
+          'M50,50 L350,50 L350,250 L50,250 Z',
+          'M150,50 L150,150',
+          'M250,50 L250,150',
+          'M50,150 L350,150',
+          'M200,150 L200,250'
+        ],
+        rooms: [
+          { x: 100, y: 100, text: 'BR1' },
+          { x: 200, y: 100, text: 'Bath' },
+          { x: 300, y: 100, text: 'BR2' },
+          { x: 125, y: 200, text: 'Living' },
+          { x: 275, y: 200, text: 'Kitchen' }
+        ]
+      }
+    };
+    
+    const plan = plans[id as keyof typeof plans];
+    
+    return `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .wall { fill: none; stroke: #333; stroke-width: 3; }
+            .room-text { font-family: Arial; font-size: 12px; text-anchor: middle; fill: #666; }
+          </style>
+        </defs>
+        <rect width="100%" height="100%" fill="#f8f9fa"/>
+        ${plan.walls.map(wall => `<path d="${wall}" class="wall"/>`).join('')}
+        ${plan.rooms.map(room => `<text x="${room.x}" y="${room.y}" class="room-text">${room.text}</text>`).join('')}
+      </svg>
+    `;
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -70,9 +144,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
           Example Floor Plans
         </h4>
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105">
-              <ImageIcon className="w-8 h-8 text-purple-400" />
+          {[
+            { id: 1, name: 'Simple Layout' },
+            { id: 2, name: 'Open Floor' },
+            { id: 3, name: 'Multi-Room' }
+          ].map((example) => (
+            <div 
+              key={example.id} 
+              className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105"
+              onClick={() => handleExampleClick(example.id)}
+            >
+              <ImageIcon className="w-8 h-8 text-purple-400 mb-2" />
+              <span className="text-xs text-purple-600 font-medium text-center px-2">
+                {example.name}
+              </span>
             </div>
           ))}
         </div>
