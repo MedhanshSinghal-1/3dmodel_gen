@@ -191,11 +191,11 @@ const ImageProcessor = forwardRef<{ processImage: () => void }, ImageProcessorPr
       <div className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Original Image */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-indigo-200/30 p-6 hover:shadow-3xl transition-all duration-300">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
               Original Image
             </h3>
-            <div className="aspect-square bg-gradient-to-br from-slate-100 to-purple-50 rounded-xl overflow-hidden shadow-inner border border-purple-100">
+            <div className="aspect-square bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl overflow-hidden shadow-inner border border-indigo-100">
               <img
                 src={imageData}
                 alt="Original floor plan"
@@ -205,11 +205,11 @@ const ImageProcessor = forwardRef<{ processImage: () => void }, ImageProcessorPr
           </div>
           
           {/* Processed Preview */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-indigo-200/30 p-6 hover:shadow-3xl transition-all duration-300">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
               Processed Preview
             </h3>
-            <div className="aspect-square bg-gradient-to-br from-slate-100 to-purple-50 rounded-xl overflow-hidden flex items-center justify-center shadow-inner border border-purple-100">
+            <div className="aspect-square bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner border border-indigo-100">
               {previewImage ? (
                 <img
                   src={previewImage}
@@ -218,11 +218,11 @@ const ImageProcessor = forwardRef<{ processImage: () => void }, ImageProcessorPr
                 />
               ) : isProcessing ? (
                 <div className="text-center">
-                  <Loader2 className="w-10 h-10 text-purple-500 animate-spin mx-auto mb-3" />
-                  <p className="text-sm text-purple-600 font-medium">Processing...</p>
+                  <Loader2 className="w-10 h-10 text-indigo-500 animate-spin mx-auto mb-3" />
+                  <p className="text-sm text-indigo-600 font-medium">Processing...</p>
                 </div>
               ) : (
-                <div className="text-center text-purple-400">
+                <div className="text-center text-indigo-400">
                   <AlertCircle className="w-10 h-10 mx-auto mb-3" />
                   <p className="text-sm">Processed image will appear here</p>
                 </div>
@@ -233,9 +233,9 @@ const ImageProcessor = forwardRef<{ processImage: () => void }, ImageProcessorPr
         
         {/* Processing Steps */}
         {isProcessing && (
-          <div className="mt-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 p-6 hover:shadow-2xl transition-all duration-300">
+          <div className="mt-6 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-indigo-200/30 p-6 hover:shadow-3xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 AI Processing Pipeline
               </h3>
               {confidence > 0 && (
@@ -252,9 +252,9 @@ const ImageProcessor = forwardRef<{ processImage: () => void }, ImageProcessorPr
                 <div key={step} className="flex items-center space-x-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ${
                     index < currentStepIndex
-                      ? 'bg-gradient-to-r from-green-500 to-teal-500'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
                       : index === currentStepIndex
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse'
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse'
                       : 'bg-slate-200'
                   }`}>
                     {index < currentStepIndex ? (

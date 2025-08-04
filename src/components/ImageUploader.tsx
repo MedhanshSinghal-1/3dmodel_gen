@@ -107,21 +107,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
         {...getRootProps()}
         className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 transform hover:scale-105 ${
           isDragActive
-            ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 shadow-xl'
-            : 'border-purple-300 hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-25 hover:to-blue-25 hover:shadow-lg'
+            ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-xl'
+            : 'border-indigo-300 hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-25 hover:to-purple-25 hover:shadow-lg'
         }`}
       >
         <input {...getInputProps()} />
         <div className="space-y-4">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center shadow-lg">
             {isDragActive ? (
-              <Upload className="w-10 h-10 text-purple-600 animate-bounce" />
+              <Upload className="w-10 h-10 text-indigo-600 animate-bounce" />
             ) : (
-              <ImageIcon className="w-10 h-10 text-purple-500" />
+              <ImageIcon className="w-10 h-10 text-indigo-500" />
             )}
           </div>
           <div>
-            <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
               {isDragActive ? 'Drop your floor plan here!' : 'Upload Your Floor Plan'}
             </h3>
             <p className="text-slate-700 mb-4 font-medium">
@@ -131,7 +131,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
               Supports PNG, JPG, JPEG files up to 10MB
             </p>
           </div>
-          <button className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <button className="inline-flex items-center px-6 py-3 border border-transparent rounded-2xl text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
             <Upload className="w-4 h-4 mr-2" />
             Choose File
           </button>
@@ -140,7 +140,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
       
       {/* Example images */}
       <div className="mt-8 text-center">
-        <h4 className="text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+        <h4 className="text-base font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
           Example Floor Plans
         </h4>
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
@@ -151,11 +151,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
           ].map((example) => (
             <div 
               key={example.id} 
-              className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105"
+              className="aspect-square bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105"
               onClick={() => handleExampleClick(example.id)}
             >
-              <ImageIcon className="w-8 h-8 text-purple-400 mb-2" />
-              <span className="text-xs text-purple-600 font-medium text-center px-2">
+              <ImageIcon className="w-8 h-8 text-indigo-400 mb-2" />
+              <span className="text-xs text-indigo-600 font-medium text-center px-2">
                 {example.name}
               </span>
             </div>
